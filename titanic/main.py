@@ -65,20 +65,18 @@ for epoch in range(1000):
     loss.backward()
     optimizer.step()
 
-train = pd.get_dummies(train, columns=["Embarked"], dtype=int)
-train["HasCabin"] = train["Cabin"].notna().astype(int)
-train["NumCabins"] = train["Cabin"].fillna("").apply(
+test = pd.get_dummies(test, columns=["Embarked"], dtype=int)
+test["HasCabin"] = test["Cabin"].notna().astype(int)
+test["NumCabins"] = test["Cabin"].fillna("").apply(
     lambda x: len(x.split()) if x else 0
 )
-train["Deck"] = train["Cabin"].str[0].fillna("Unkown")
-train = pd.get_dummies(train, columns=["Deck"], dtype=int)
-train = pd.get_dummies(train, columns=["Sex"], dtype=int)
-train["Age"] = train["Age"].fillna(train["Age"].median())
-
-Y = train["Survived"]
-train = train.drop(columns=["Name", "Cabin", "Survived", "PassengerId", "Ticket"])
-X = train
+test["Deck"] = test["Cabin"].str[0].fillna("Unkown")
+test = pd.get_dummies(test, columns=["Deck"], dtype=int)
+test = pd.get_dummies(test, columns=["Sex"], dtype=int)
+test["Age"] = test["Age"].fillna(test["Age"].median())
+test = test.drop(columns=["Name", "Cabin","PassengerId", "Ticket"])
+X = test
 
 
-X = torch.tensor(train.values, dtype=torch.float32)
-Y = torch.tensor(Y.values, dtype=torch.float32).reshape(-1, 1)
+X = torch.tensor(test.values, dtype=torch.float32)
+
