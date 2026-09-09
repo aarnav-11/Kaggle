@@ -74,9 +74,29 @@ test["Deck"] = test["Cabin"].str[0].fillna("Unkown")
 test = pd.get_dummies(test, columns=["Deck"], dtype=int)
 test = pd.get_dummies(test, columns=["Sex"], dtype=int)
 test["Age"] = test["Age"].fillna(test["Age"].median())
-test = test.drop(columns=["Name", "Cabin","PassengerId", "Ticket"])
+test = test.drop(columns=["Name", "Cabin", "Ticket"])
 X = test
 
 
 X = torch.tensor(test.values, dtype=torch.float32)
 
+model.eval()
+passenger_ids = test["PassengerId"].copy()
+
+with torch.no_grad():
+    logits = model(X)
+    probabilities = torch.sigmoid(logits)
+    predictions = (probabilities >= 0.5).int().squeeze(1).numpy()
+
+# -------------------------
+# Create submission
+# -------------------------
+
+submission = pd.DataFrame({
+    "PassengerId": passenger_ids,
+    "Survived": predictions
+})
+
+print(submission.head())
+
+submission.to_csv("submission.csv", index=False)
