@@ -64,3 +64,21 @@ for epoch in range(1000):
     optimizer.zero_grad()
     loss.backward()
     optimizer.step()
+
+train = pd.get_dummies(train, columns=["Embarked"], dtype=int)
+train["HasCabin"] = train["Cabin"].notna().astype(int)
+train["NumCabins"] = train["Cabin"].fillna("").apply(
+    lambda x: len(x.split()) if x else 0
+)
+train["Deck"] = train["Cabin"].str[0].fillna("Unkown")
+train = pd.get_dummies(train, columns=["Deck"], dtype=int)
+train = pd.get_dummies(train, columns=["Sex"], dtype=int)
+train["Age"] = train["Age"].fillna(train["Age"].median())
+
+Y = train["Survived"]
+train = train.drop(columns=["Name", "Cabin", "Survived", "PassengerId", "Ticket"])
+X = train
+
+
+X = torch.tensor(train.values, dtype=torch.float32)
+Y = torch.tensor(Y.values, dtype=torch.float32).reshape(-1, 1)
